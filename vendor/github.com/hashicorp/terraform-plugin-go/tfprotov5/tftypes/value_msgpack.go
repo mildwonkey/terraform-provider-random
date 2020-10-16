@@ -239,6 +239,7 @@ func marshalMsgPackObject(val Value, typ Type, p Path, enc *msgpack.Encoder) err
 		if err != nil {
 			return err
 		}
+
 		err = marshalMsgPack(v, ty, p, enc)
 		if err != nil {
 			return err

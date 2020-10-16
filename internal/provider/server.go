@@ -65,32 +65,32 @@ func Server() tfprotov5.ProviderServer {
 							Description:     "The length (in words) of the pet name.",
 							DescriptionKind: tfprotov5.StringKindPlain,
 						},
-						// {
-						// 	Name:            "separator",
-						// 	Type:            tftypes.String,
-						// 	Description:     "The character to separate words in the pet name.",
-						// 	DescriptionKind: tfprotov5.StringKindPlain,
-						// 	Optional:        true,
-						// },
+						{
+							Name:            "separator",
+							Type:            tftypes.String,
+							Description:     "The character to separate words in the pet name.",
+							DescriptionKind: tfprotov5.StringKindPlain,
+							Computed:        true,
+						},
 					},
-					// BlockTypes: []*tfprotov5.SchemaNestedBlock{
-					// 	{
-					// 		TypeName: "component",
-					// 		Nesting:  tfprotov5.SchemaNestedBlockNestingModeSingle,
-					// 		Block: &tfprotov5.SchemaBlock{
-					// 			Version:   1,
-					// 			Sensitive: true,
-					// 			Attributes: []*tfprotov5.SchemaAttribute{
-					// 				{
-					// 					Name:            "prefix",
-					// 					Type:            tftypes.String,
-					// 					Description:     "A string to prefix the name with.",
-					// 					DescriptionKind: tfprotov5.StringKindPlain,
-					// 				},
-					// 			},
-					// 		},
-					// 	},
-					// },
+					BlockTypes: []*tfprotov5.SchemaNestedBlock{
+						{
+							TypeName: "component",
+							Nesting:  tfprotov5.SchemaNestedBlockNestingModeSingle,
+							Block: &tfprotov5.SchemaBlock{
+								Version:   1,
+								Sensitive: true,
+								Attributes: []*tfprotov5.SchemaAttribute{
+									{
+										Name:            "prefix",
+										Type:            tftypes.String,
+										Description:     "A string to prefix the name with.",
+										DescriptionKind: tfprotov5.StringKindPlain,
+									},
+								},
+							},
+						},
+					},
 				},
 			},
 		},

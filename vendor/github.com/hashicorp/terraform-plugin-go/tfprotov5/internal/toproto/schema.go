@@ -26,6 +26,7 @@ func Schema_Block(in *tfprotov5.SchemaBlock) (*tfplugin5.Schema_Block, error) {
 		Description:     in.Description,
 		DescriptionKind: StringKind(in.DescriptionKind),
 		Deprecated:      in.Deprecated,
+		Sensitive:       in.Sensitive,
 	}
 	attrs, err := Schema_Attributes(in.Attributes)
 	if err != nil {

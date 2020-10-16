@@ -45,14 +45,17 @@ func (val Value) As(dst interface{}) error {
 	if ok {
 		return unmarshaler.UnmarshalTerraform5Type(val)
 	}
-	if val.IsNull() {
-		return fmt.Errorf("unmarshaling null values is not supported")
-	}
+	// if val.IsNull() {
+	// 	return fmt.Errorf("unmarshaling null values is not supported")
+	// }
 	if !val.IsKnown() {
 		return fmt.Errorf("unmarshaling unknown values is not supported")
 	}
 	switch target := dst.(type) {
 	case *string:
+		if val.IsNull() {
+			return nil
+		}
 		v, ok := val.value.(string)
 		if !ok {
 			return fmt.Errorf("can't unmarshal %s into %T, expected string", val.typ, dst)
@@ -60,6 +63,9 @@ func (val Value) As(dst interface{}) error {
 		*target = v
 		return nil
 	case *big.Float:
+		if val.IsNull() {
+			return nil
+		}
 		v, ok := val.value.(*big.Float)
 		if !ok {
 			return fmt.Errorf("can't unmarshal %s into %T, expected *big.Float", val.typ, dst)
@@ -67,6 +73,9 @@ func (val Value) As(dst interface{}) error {
 		target.Set(v)
 		return nil
 	case *bool:
+		if val.IsNull() {
+			return nil
+		}
 		v, ok := val.value.(bool)
 		if !ok {
 			return fmt.Errorf("can't unmarshal %s into %T, expected boolean", val.typ, dst)
@@ -81,6 +90,9 @@ func (val Value) As(dst interface{}) error {
 		*target = v
 		return nil
 	case *[]Value:
+		if val.IsNull() {
+			return nil
+		}
 		v, ok := val.value.([]Value)
 		if !ok {
 			return fmt.Errorf("can't unmarshal %s into %T expected []tftypes.Value", val.typ, dst)

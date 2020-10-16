@@ -13,8 +13,10 @@ import (
 )
 
 type resourcePet struct {
-	Length big.Float
-	Id     string
+	Id        string
+	Length    big.Float
+	Separator string
+	Component component
 }
 
 func (r *resourcePet) UnmarshalTerraform5Type(v tftypes.Value) error {
@@ -27,20 +29,52 @@ func (r *resourcePet) UnmarshalTerraform5Type(v tftypes.Value) error {
 	if err != nil {
 		return err
 	}
+	err = val["separator"].As(&r.Separator)
+	if err != nil {
+		return err
+	}
+	if r.Separator == "" {
+		r.Separator = "-"
+	}
+	err = val["component"].As(&r.Component)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type component struct {
+	Prefix string
+}
+
+func (c component) schema() tftypes.Object {
+	return tftypes.Object{
+		AttributeTypes: map[string]tftypes.Type{
+			"prefix": tftypes.String,
+		},
+	}
+}
+
+func (c *component) UnmarshalTerraform5Type(v tftypes.Value) error {
+	var val map[string]tftypes.Value
+	err := v.As(&val)
+	if err != nil {
+		return err
+	}
+	err = val["prefix"].As(&c.Prefix)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
 func (r resourcePet) schema() tftypes.Object {
 	return tftypes.Object{
 		AttributeTypes: map[string]tftypes.Type{
-			"length": tftypes.Number,
-			"id":     tftypes.String,
-			//"separator": tftypes.String,
-			// "component": tftypes.Object{
-			// 	AttributeTypes: map[string]tftypes.Type{
-			// 		"prefix": tftypes.String,
-			// 	},
-			// },
+			"length":    tftypes.Number,
+			"id":        tftypes.String,
+			"separator": tftypes.String,
+			"component": component{}.schema(),
 		},
 	}
 }
@@ -67,10 +101,17 @@ func (r resourcePet) ApplyResourceChange(ctx context.Context, req *tfprotov5.App
 
 	length, _ := r.Length.Int64()
 	pet := strings.ToLower(petname.Generate(int(length), "-"))
+	if r.Component.Prefix != "" {
+		pet = fmt.Sprintf("%s%s%s", r.Component.Prefix, r.Separator, pet)
+	}
 
 	state, err := tftypes.NewValue(schema, map[string]tftypes.Value{
-		"length": tftypes.NewValue(tftypes.Number, &r.Length),
-		"id":     tftypes.NewValue(tftypes.String, pet),
+		"length":    tftypes.NewValue(tftypes.Number, &r.Length),
+		"id":        tftypes.NewValue(tftypes.String, pet),
+		"separator": tftypes.NewValue(tftypes.String, r.Separator),
+		"component": tftypes.NewValue(component{}.schema(), map[string]tftypes.Value{
+			"prefix": tftypes.NewValue(tftypes.String, r.Component.Prefix),
+		}),
 	}).MarshalMsgPack(schema)
 
 	if err != nil {
@@ -108,10 +149,14 @@ func (r resourcePet) PlanResourceChange(ctx context.Context, req *tfprotov5.Plan
 		panic(err)
 	}
 
-	// Add an unknown value for id, so we can populate it during apply
 	proposedState, err := tftypes.NewValue(schema, map[string]tftypes.Value{
 		"length": tftypes.NewValue(tftypes.Number, &r.Length),
-		"id":     tftypes.NewValue(tftypes.String, tftypes.UnknownValue),
+		// Add an unknown value for id, so we can populate it during apply
+		"id":        tftypes.NewValue(tftypes.String, tftypes.UnknownValue),
+		"separator": tftypes.NewValue(tftypes.String, r.Separator),
+		"component": tftypes.NewValue(component{}.schema(), map[string]tftypes.Value{
+			"prefix": tftypes.NewValue(tftypes.String, r.Component.Prefix),
+		}),
 	}).MarshalMsgPack(schema)
 	if err != nil {
 		panic(err)
