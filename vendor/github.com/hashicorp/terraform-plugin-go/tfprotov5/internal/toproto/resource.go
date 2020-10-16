@@ -41,8 +41,13 @@ func UpgradeResourceState_Response(in *tfprotov5.UpgradeResourceStateResponse) (
 	if err != nil {
 		return nil, err
 	}
+
 	return &tfplugin5.UpgradeResourceState_Response{
 		Diagnostics: diags,
+		UpgradedState: &tfplugin5.DynamicValue{
+			Msgpack: in.UpgradedState.MsgPack,
+			Json:    in.UpgradedState.JSON,
+		},
 	}, nil
 }
 
