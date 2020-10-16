@@ -105,13 +105,20 @@ func (r resourcePet) ApplyResourceChange(ctx context.Context, req *tfprotov5.App
 		pet = fmt.Sprintf("%s%s%s", r.Component.Prefix, r.Separator, pet)
 	}
 
+	var comp tftypes.Value
+	if r.Component.Prefix == "" {
+		comp = tftypes.NewValue(component{}.schema(), nil)
+	} else {
+		comp = tftypes.NewValue(component{}.schema(), map[string]tftypes.Value{
+			"prefix": tftypes.NewValue(tftypes.String, r.Component.Prefix),
+		})
+	}
+
 	state, err := tftypes.NewValue(schema, map[string]tftypes.Value{
 		"length":    tftypes.NewValue(tftypes.Number, &r.Length),
 		"id":        tftypes.NewValue(tftypes.String, pet),
 		"separator": tftypes.NewValue(tftypes.String, r.Separator),
-		"component": tftypes.NewValue(component{}.schema(), map[string]tftypes.Value{
-			"prefix": tftypes.NewValue(tftypes.String, r.Component.Prefix),
-		}),
+		"component": comp,
 	}).MarshalMsgPack(schema)
 
 	if err != nil {
@@ -149,14 +156,21 @@ func (r resourcePet) PlanResourceChange(ctx context.Context, req *tfprotov5.Plan
 		panic(err)
 	}
 
+	var comp tftypes.Value
+	if r.Component.Prefix == "" {
+		comp = tftypes.NewValue(component{}.schema(), nil)
+	} else {
+		comp = tftypes.NewValue(component{}.schema(), map[string]tftypes.Value{
+			"prefix": tftypes.NewValue(tftypes.String, r.Component.Prefix),
+		})
+	}
+
 	proposedState, err := tftypes.NewValue(schema, map[string]tftypes.Value{
 		"length": tftypes.NewValue(tftypes.Number, &r.Length),
 		// Add an unknown value for id, so we can populate it during apply
 		"id":        tftypes.NewValue(tftypes.String, tftypes.UnknownValue),
+		"component": comp,
 		"separator": tftypes.NewValue(tftypes.String, r.Separator),
-		"component": tftypes.NewValue(component{}.schema(), map[string]tftypes.Value{
-			"prefix": tftypes.NewValue(tftypes.String, r.Component.Prefix),
-		}),
 	}).MarshalMsgPack(schema)
 	if err != nil {
 		panic(err)
@@ -170,7 +184,11 @@ func (r resourcePet) PlanResourceChange(ctx context.Context, req *tfprotov5.Plan
 }
 
 func (r resourcePet) ReadResource(ctx context.Context, req *tfprotov5.ReadResourceRequest) (*tfprotov5.ReadResourceResponse, error) {
-	return &tfprotov5.ReadResourceResponse{}, nil
+	return &tfprotov5.ReadResourceResponse{
+		NewState: &tfprotov5.DynamicValue{
+			MsgPack: req.CurrentState.MsgPack,
+		},
+	}, nil
 }
 
 func (r resourcePet) UpgradeResourceState(ctx context.Context, req *tfprotov5.UpgradeResourceStateRequest) (*tfprotov5.UpgradeResourceStateResponse, error) {

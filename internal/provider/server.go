@@ -2,10 +2,16 @@ package random
 
 import (
 	"context"
+	"math/rand"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/tftypes"
 )
+
+func init() {
+	rand.Seed(time.Now().UTC().UnixNano())
+}
 
 type server struct {
 	providerSchema     *tfprotov5.Schema

@@ -54,6 +54,7 @@ func (val Value) As(dst interface{}) error {
 	switch target := dst.(type) {
 	case *string:
 		if val.IsNull() {
+			*target = ""
 			return nil
 		}
 		v, ok := val.value.(string)
@@ -64,6 +65,7 @@ func (val Value) As(dst interface{}) error {
 		return nil
 	case *big.Float:
 		if val.IsNull() {
+			target.Set(big.NewFloat(0))
 			return nil
 		}
 		v, ok := val.value.(*big.Float)
@@ -74,6 +76,7 @@ func (val Value) As(dst interface{}) error {
 		return nil
 	case *bool:
 		if val.IsNull() {
+			*target = false
 			return nil
 		}
 		v, ok := val.value.(bool)
@@ -83,6 +86,10 @@ func (val Value) As(dst interface{}) error {
 		*target = v
 		return nil
 	case *map[string]Value:
+		if val.IsNull() {
+			*target = map[string]Value{}
+			return nil
+		}
 		v, ok := val.value.(map[string]Value)
 		if !ok {
 			return fmt.Errorf("can't unmarshal %s into %T, expected map[string]tftypes.Value", val.typ, dst)
@@ -91,6 +98,7 @@ func (val Value) As(dst interface{}) error {
 		return nil
 	case *[]Value:
 		if val.IsNull() {
+			*target = []Value{}
 			return nil
 		}
 		v, ok := val.value.([]Value)
