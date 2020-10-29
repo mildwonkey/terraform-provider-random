@@ -2,10 +2,16 @@ package random
 
 import (
 	"context"
+	"math/rand"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5/tftypes"
 )
+
+func init() {
+	rand.Seed(time.Now().UTC().UnixNano())
+}
 
 type server struct {
 	providerSchema     *tfprotov5.Schema
@@ -64,33 +70,36 @@ func Server() tfprotov5.ProviderServer {
 							Type:            tftypes.Number,
 							Description:     "The length (in words) of the pet name.",
 							DescriptionKind: tfprotov5.StringKindPlain,
+							Computed:        true,
 						},
-						// {
-						// 	Name:            "separator",
-						// 	Type:            tftypes.String,
-						// 	Description:     "The character to separate words in the pet name.",
-						// 	DescriptionKind: tfprotov5.StringKindPlain,
-						// 	Optional:        true,
-						// },
+						{
+							Name:            "separator",
+							Type:            tftypes.String,
+							Description:     "The character to separate words in the pet name.",
+							DescriptionKind: tfprotov5.StringKindPlain,
+							Computed:        true,
+						},
+						{
+							Name: "component",
+							NestedBlock: &tfprotov5.SchemaNestedBlock{
+								TypeName: "component",
+								Block: &tfprotov5.SchemaBlock{
+									Attributes: []*tfprotov5.SchemaAttribute{
+										{
+											Type:        tftypes.String,
+											Name:        "prefix",
+											Optional:    true,
+											Description: "a string prefix for the pet name",
+										},
+									},
+								},
+								Nesting: tfprotov5.SchemaNestedBlockNestingModeSingle,
+							},
+							Description:     "The character to separate words in the pet name.",
+							DescriptionKind: tfprotov5.StringKindPlain,
+							Optional:        true,
+						},
 					},
-					// BlockTypes: []*tfprotov5.SchemaNestedBlock{
-					// 	{
-					// 		TypeName: "component",
-					// 		Nesting:  tfprotov5.SchemaNestedBlockNestingModeSingle,
-					// 		Block: &tfprotov5.SchemaBlock{
-					// 			Version:   1,
-					// 			Sensitive: true,
-					// 			Attributes: []*tfprotov5.SchemaAttribute{
-					// 				{
-					// 					Name:            "prefix",
-					// 					Type:            tftypes.String,
-					// 					Description:     "A string to prefix the name with.",
-					// 					DescriptionKind: tfprotov5.StringKindPlain,
-					// 				},
-					// 			},
-					// 		},
-					// 	},
-					// },
 				},
 			},
 		},

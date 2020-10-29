@@ -13,17 +13,60 @@ import (
 )
 
 type resourcePet struct {
-	Length big.Float
-	Id     string
+	Id        string
+	Length    big.Float
+	Separator string
+	Component component
 }
 
-func (r *resourcePet) UnmarshalTerraform5Type(v tftypes.Value) error {
+func (r *resourcePet) FromTerraform5Value(v tftypes.Value) error {
 	var val map[string]tftypes.Value
 	err := v.As(&val)
 	if err != nil {
 		return err
 	}
+
+	err = val["id"].As(&r.Id)
+	if err != nil {
+		return err
+	}
 	err = val["length"].As(&r.Length)
+	if err != nil {
+		return err
+	}
+	err = val["separator"].As(&r.Separator)
+	if err != nil {
+		return err
+	}
+	if r.Separator == "" {
+		r.Separator = "-"
+	}
+	err = val["component"].As(&r.Component)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type component struct {
+	Prefix string
+}
+
+func (c component) schema() tftypes.Object {
+	return tftypes.Object{
+		AttributeTypes: map[string]tftypes.Type{
+			"prefix": tftypes.String,
+		},
+	}
+}
+
+func (c *component) FromTerraform5Value(v tftypes.Value) error {
+	var val map[string]tftypes.Value
+	err := v.As(&val)
+	if err != nil {
+		return err
+	}
+	err = val["prefix"].As(&c.Prefix)
 	if err != nil {
 		return err
 	}
@@ -33,14 +76,10 @@ func (r *resourcePet) UnmarshalTerraform5Type(v tftypes.Value) error {
 func (r resourcePet) schema() tftypes.Object {
 	return tftypes.Object{
 		AttributeTypes: map[string]tftypes.Type{
-			"length": tftypes.Number,
-			"id":     tftypes.String,
-			//"separator": tftypes.String,
-			// "component": tftypes.Object{
-			// 	AttributeTypes: map[string]tftypes.Type{
-			// 		"prefix": tftypes.String,
-			// 	},
-			// },
+			"length":    tftypes.Number,
+			"id":        tftypes.String,
+			"separator": tftypes.String,
+			"component": component{}.schema(),
 		},
 	}
 }
@@ -67,10 +106,24 @@ func (r resourcePet) ApplyResourceChange(ctx context.Context, req *tfprotov5.App
 
 	length, _ := r.Length.Int64()
 	pet := strings.ToLower(petname.Generate(int(length), "-"))
+	if r.Component.Prefix != "" {
+		pet = fmt.Sprintf("%s%s%s", r.Component.Prefix, r.Separator, pet)
+	}
+
+	var comp tftypes.Value
+	if r.Component.Prefix == "" {
+		comp = tftypes.NewValue(component{}.schema(), nil)
+	} else {
+		comp = tftypes.NewValue(component{}.schema(), map[string]tftypes.Value{
+			"prefix": tftypes.NewValue(tftypes.String, r.Component.Prefix),
+		})
+	}
 
 	state, err := tftypes.NewValue(schema, map[string]tftypes.Value{
-		"length": tftypes.NewValue(tftypes.Number, &r.Length),
-		"id":     tftypes.NewValue(tftypes.String, pet),
+		"length":    tftypes.NewValue(tftypes.Number, &r.Length),
+		"id":        tftypes.NewValue(tftypes.String, pet),
+		"separator": tftypes.NewValue(tftypes.String, r.Separator),
+		"component": comp,
 	}).MarshalMsgPack(schema)
 
 	if err != nil {
@@ -108,10 +161,27 @@ func (r resourcePet) PlanResourceChange(ctx context.Context, req *tfprotov5.Plan
 		panic(err)
 	}
 
-	// Add an unknown value for id, so we can populate it during apply
+	var comp tftypes.Value
+	if r.Component.Prefix == "" {
+		comp = tftypes.NewValue(component{}.schema(), nil)
+	} else {
+		comp = tftypes.NewValue(component{}.schema(), map[string]tftypes.Value{
+			"prefix": tftypes.NewValue(tftypes.String, r.Component.Prefix),
+		})
+	}
+
+	var id tftypes.Value
+	if r.Id == "" {
+		id = tftypes.NewValue(tftypes.String, tftypes.UnknownValue)
+	} else {
+		id = tftypes.NewValue(tftypes.String, r.Id)
+	}
+
 	proposedState, err := tftypes.NewValue(schema, map[string]tftypes.Value{
-		"length": tftypes.NewValue(tftypes.Number, &r.Length),
-		"id":     tftypes.NewValue(tftypes.String, tftypes.UnknownValue),
+		"length":    tftypes.NewValue(tftypes.Number, &r.Length),
+		"id":        id,
+		"component": comp,
+		"separator": tftypes.NewValue(tftypes.String, r.Separator),
 	}).MarshalMsgPack(schema)
 	if err != nil {
 		panic(err)
@@ -125,11 +195,17 @@ func (r resourcePet) PlanResourceChange(ctx context.Context, req *tfprotov5.Plan
 }
 
 func (r resourcePet) ReadResource(ctx context.Context, req *tfprotov5.ReadResourceRequest) (*tfprotov5.ReadResourceResponse, error) {
-	return &tfprotov5.ReadResourceResponse{}, nil
+	return &tfprotov5.ReadResourceResponse{
+		NewState: &tfprotov5.DynamicValue{
+			MsgPack: req.CurrentState.MsgPack,
+		},
+	}, nil
 }
 
 func (r resourcePet) UpgradeResourceState(ctx context.Context, req *tfprotov5.UpgradeResourceStateRequest) (*tfprotov5.UpgradeResourceStateResponse, error) {
 	return &tfprotov5.UpgradeResourceStateResponse{
-		UpgradedState: req.RawState,
+		UpgradedState: &tfprotov5.DynamicValue{
+			JSON: req.RawState.JSON,
+		},
 	}, nil
 }
