@@ -248,8 +248,8 @@ func (r resourcePet) UpgradeResourceState(ctx context.Context, req *tfprotov5.Up
 	}
 
 	return &tfprotov5.UpgradeResourceStateResponse{
-		UpgradedState: &tfprotov5.DynamicValue{
-			MsgPack: upgradedState,
+		UpgradedState: &tfprotov5.RawState{
+			JSON: upgradedState,
 		},
 	}, nil
 }

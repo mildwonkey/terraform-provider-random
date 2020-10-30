@@ -84,8 +84,8 @@ func Server() tfprotov5.ProviderServer {
 							TypeName: "component",
 							Nesting:  tfprotov5.SchemaNestedBlockNestingModeSingle,
 							Block: &tfprotov5.SchemaBlock{
-								Version:   1,
-								Sensitive: true,
+								Version: 1,
+								//Sensitive: true,
 								Attributes: []*tfprotov5.SchemaAttribute{
 									{
 										Name:            "prefix",
