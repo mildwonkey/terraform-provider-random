@@ -19,8 +19,8 @@ type server struct {
 	resourceSchemas    map[string]*tfprotov5.Schema
 	dataSourceSchemas  map[string]*tfprotov5.Schema
 
-	tfprotov5.ResourceRouter
-	tfprotov5.DataSourceRouter
+	tfprotov5.DataSourceServer
+	tfprotov5.ResourceServer
 }
 
 func (s server) GetProviderSchema(ctx context.Context, req *tfprotov5.GetProviderSchemaRequest) (*tfprotov5.GetProviderSchemaResponse, error) {
@@ -52,8 +52,6 @@ func Server() tfprotov5.ProviderServer {
 			Version: 1,
 			Block:   &tfprotov5.SchemaBlock{},
 		},
-		dataSourceSchemas: map[string]*tfprotov5.Schema{},
-		DataSourceRouter:  tfprotov5.DataSourceRouter{},
 		resourceSchemas: map[string]*tfprotov5.Schema{
 			"random_pet": {
 				Version: 1,
@@ -90,6 +88,7 @@ func Server() tfprotov5.ProviderServer {
 											Name:        "prefix",
 											Optional:    true,
 											Description: "a string prefix for the pet name",
+											Sensitive:   true,
 										},
 									},
 								},
@@ -103,8 +102,6 @@ func Server() tfprotov5.ProviderServer {
 				},
 			},
 		},
-		ResourceRouter: tfprotov5.ResourceRouter{
-			"random_pet": resourcePet{},
-		},
+		ResourceServer: resourcePet{},
 	}
 }

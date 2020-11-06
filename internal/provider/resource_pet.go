@@ -94,6 +94,15 @@ func (r resourcePet) ValidateResourceTypeConfig(ctx context.Context, req *tfprot
 
 func (r resourcePet) ApplyResourceChange(ctx context.Context, req *tfprotov5.ApplyResourceChangeRequest) (*tfprotov5.ApplyResourceChangeResponse, error) {
 	schema := r.schema()
+	planned, err := req.PlannedState.Unmarshal(schema)
+	// destroy
+	if planned.IsNull() {
+		return &tfprotov5.ApplyResourceChangeResponse{
+			NewState: &tfprotov5.DynamicValue{
+				MsgPack: req.PlannedState.MsgPack,
+			},
+		}, nil
+	}
 
 	config, err := req.Config.Unmarshal(schema)
 	if err != nil {

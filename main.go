@@ -2,7 +2,7 @@ package main
 
 import (
 	plugin "github.com/hashicorp/go-plugin"
-	tfprotov5server "github.com/hashicorp/terraform-plugin-go/tfprotov5/server"
+	tf5server "github.com/hashicorp/terraform-plugin-go/tfprotov5/server"
 	random "github.com/mildwonkey/terraform-provider-random/internal/provider"
 )
 
@@ -18,7 +18,7 @@ func main() {
 		HandshakeConfig: handshakeConfig,
 		GRPCServer:      plugin.DefaultGRPCServer,
 		Plugins: plugin.PluginSet{
-			"provider": &tfprotov5server.GRPCProviderPlugin{
+			"provider": &tf5server.GRPCProviderPlugin{
 				GRPCProvider: random.Server,
 			},
 		},
