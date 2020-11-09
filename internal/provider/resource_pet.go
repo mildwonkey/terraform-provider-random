@@ -69,10 +69,12 @@ func (c *component) FromTerraform5Value(v tftypes.Value) error {
 		return err
 	}
 	if prefix, ok := val["prefix"]; ok {
-		err = prefix.As(c.Prefix)
+		var pre string
+		err = prefix.As(pre)
 		if err != nil {
 			return err
 		}
+		c.Prefix = pre
 	}
 	return nil
 }
