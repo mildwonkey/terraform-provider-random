@@ -40,9 +40,13 @@ func (r *resourcePet) FromTerraform5Value(v tftypes.Value) error {
 	if r.Separator == "" {
 		r.Separator = "-"
 	}
-	err = val["component"].As(r.Component)
-	if err != nil {
-		return err
+
+	if comp, ok := val["component"]; ok {
+		r.Component = &component{}
+		err = comp.As(r.Component)
+		if err != nil {
+			return err
+		}
 	}
 	if r.Component == nil {
 		r.Component = &component{Prefix: "computed"}
@@ -70,7 +74,7 @@ func (c *component) FromTerraform5Value(v tftypes.Value) error {
 	}
 	if prefix, ok := val["prefix"]; ok {
 		var pre string
-		err = prefix.As(pre)
+		err = prefix.As(&pre)
 		if err != nil {
 			return err
 		}
