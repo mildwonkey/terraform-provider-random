@@ -7,3 +7,5 @@ require (
 	github.com/hashicorp/go-plugin v1.3.0
 	github.com/hashicorp/terraform-plugin-go v0.0.0-20201012175337-6d46ef75491b
 )
+
+replace github.com/hashicorp/terraform-plugin-go => /Users/kristin/go/src/github.com/mildwonkey/terraform-plugin-go
