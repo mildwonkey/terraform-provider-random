@@ -19,8 +19,8 @@ type server struct {
 	resourceSchemas    map[string]*tfprotov5.Schema
 	dataSourceSchemas  map[string]*tfprotov5.Schema
 
-	tfprotov5.ResourceRouter
-	tfprotov5.DataSourceRouter
+	tfprotov5.ResourceServer
+	tfprotov5.DataSourceServer
 }
 
 func (s server) GetProviderSchema(ctx context.Context, req *tfprotov5.GetProviderSchemaRequest) (*tfprotov5.GetProviderSchemaResponse, error) {
@@ -52,8 +52,6 @@ func Server() tfprotov5.ProviderServer {
 			Version: 1,
 			Block:   &tfprotov5.SchemaBlock{},
 		},
-		dataSourceSchemas: map[string]*tfprotov5.Schema{},
-		DataSourceRouter:  tfprotov5.DataSourceRouter{},
 		resourceSchemas: map[string]*tfprotov5.Schema{
 			"random_pet": {
 				Version: 1,
@@ -70,38 +68,28 @@ func Server() tfprotov5.ProviderServer {
 							Type:            tftypes.Number,
 							Description:     "The length (in words) of the pet name.",
 							DescriptionKind: tfprotov5.StringKindPlain,
+							Optional:        true,
+							Computed:        true,
 						},
 						{
 							Name:            "separator",
 							Type:            tftypes.String,
 							Description:     "The character to separate words in the pet name.",
 							DescriptionKind: tfprotov5.StringKindPlain,
+							Optional:        true,
 							Computed:        true,
 						},
-					},
-					BlockTypes: []*tfprotov5.SchemaNestedBlock{
 						{
-							TypeName: "component",
-							Nesting:  tfprotov5.SchemaNestedBlockNestingModeSingle,
-							Block: &tfprotov5.SchemaBlock{
-								Version: 1,
-								//Sensitive: true,
-								Attributes: []*tfprotov5.SchemaAttribute{
-									{
-										Name:            "prefix",
-										Type:            tftypes.String,
-										Description:     "A string to prefix the name with.",
-										DescriptionKind: tfprotov5.StringKindPlain,
-									},
-								},
-							},
+							Name:            "prefix",
+							Type:            tftypes.String,
+							Description:     "A string to prefix the name with.",
+							DescriptionKind: tfprotov5.StringKindPlain,
+							Optional:        true,
 						},
 					},
 				},
 			},
 		},
-		ResourceRouter: tfprotov5.ResourceRouter{
-			"random_pet": resourcePet{},
-		},
+		ResourceServer: resourcePet{},
 	}
 }
