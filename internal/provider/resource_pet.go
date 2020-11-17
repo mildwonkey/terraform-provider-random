@@ -174,6 +174,12 @@ func (r resourcePet) ApplyResourceChange(ctx context.Context, req *tfprotov5.App
 		pet = strings.ToLower(petname.Generate(r.Length, "-"))
 	}
 
+	if len(r.Components) != 0 {
+		for _, comp := range r.Components {
+			pet = fmt.Sprintf("%s%s%s", comp.Prefix, r.Separator, pet)
+		}
+	}
+
 	state, err := tftypes.NewValue(schema, map[string]tftypes.Value{
 		"length":     tftypes.NewValue(tftypes.Number, &r.Length),
 		"id":         tftypes.NewValue(tftypes.String, pet),
@@ -227,17 +233,16 @@ func (r resourcePet) PlanResourceChange(ctx context.Context, req *tfprotov5.Plan
 	if r.Id == "" {
 		id = tftypes.NewValue(tftypes.String, tftypes.UnknownValue)
 	} else {
-
-		config, err := req.Config.Unmarshal(schema)
+		prior, err := req.PriorState.Unmarshal(schema)
 		if err != nil {
 			panic(err)
 		}
-		var configPet resourcePet
-		err = config.As(&configPet)
+		var priorPet resourcePet
+		err = prior.As(&priorPet)
 		if err != nil {
 			panic(err)
 		}
-		if r.Equals(configPet) {
+		if r.Equals(priorPet) {
 			id = tftypes.NewValue(tftypes.String, r.Id)
 		} else {
 			id = tftypes.NewValue(tftypes.String, tftypes.UnknownValue)
@@ -302,7 +307,7 @@ func (c components) ToTfValue() tftypes.Value {
 			if v.Computed != "" {
 				computed = tftypes.NewValue(tftypes.String, v.Computed)
 			} else {
-				computed = tftypes.NewValue(tftypes.String, nil)
+				computed = tftypes.NewValue(tftypes.String, "computed")
 			}
 
 			list[i] = tftypes.NewValue(component{}.schema(), map[string]tftypes.Value{

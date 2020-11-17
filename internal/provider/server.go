@@ -80,31 +80,45 @@ func Server() tfprotov5.ProviderServer {
 						},
 						{
 							Name: "components",
-							Type: tftypes.List{
-								ElementType: tftypes.Object{
-									AttributeTypes: map[string]tftypes.Type{
-										"prefix":   tftypes.String,
-										"secret":   tftypes.String,
-										"computed": tftypes.String,
-									},
-									OptionalAttrs: []string{"secret", "computed"},
-								},
-							},
-							// NestedBlock: &tfprotov5.SchemaNestedBlock{
-							// 	TypeName: "components",
-							// 	Block: &tfprotov5.SchemaBlock{
-							// 		Attributes: []*tfprotov5.SchemaAttribute{
-							// 			{
-							// 				Type:        tftypes.String,
-							// 				Name:        "prefix",
-							// 				Optional:    true,
-							// 				Description: "a string prefix for the pet name",
-							// 				Sensitive:   true,
-							// 			},
+							// Type: tftypes.List{
+							// 	ElementType: tftypes.Object{
+							// 		AttributeTypes: map[string]tftypes.Type{
+							// 			"prefix":   tftypes.String,
+							// 			"secret":   tftypes.String,
+							// 			"computed": tftypes.String,
 							// 		},
+							// 		OptionalAttrs: []string{"secret", "computed"},
 							// 	},
-							// 	Nesting: tfprotov5.SchemaNestedBlockNestingModeList,
 							// },
+							NestedBlock: &tfprotov5.SchemaNestedBlock{
+								TypeName: "components",
+								Block: &tfprotov5.SchemaBlock{
+									Attributes: []*tfprotov5.SchemaAttribute{
+										{
+											Type:        tftypes.String,
+											Name:        "prefix",
+											Optional:    true,
+											Description: "a string prefix for the pet name",
+											Sensitive:   false,
+										},
+										{
+											Type:        tftypes.String,
+											Name:        "secret",
+											Optional:    true,
+											Description: "a string prefix for the pet name",
+											Sensitive:   true,
+										},
+										{
+											Type:        tftypes.String,
+											Name:        "computed",
+											Optional:    true,
+											Description: "a string prefix for the pet name",
+											Computed:    true,
+										},
+									},
+								},
+								Nesting: tfprotov5.SchemaNestedBlockNestingModeList,
+							},
 							Description:     "The character to separate words in the pet name.",
 							DescriptionKind: tfprotov5.StringKindPlain,
 							Optional:        true,
