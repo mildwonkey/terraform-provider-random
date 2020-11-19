@@ -157,6 +157,8 @@ func (r resourcePet) ApplyResourceChange(ctx context.Context, req *tfprotov5.App
 			},
 		}, nil
 	}
+	var planState resourcePet
+	err = planned.As(&planState)
 
 	config, err := req.Config.Unmarshal(schema)
 	if err != nil {
@@ -175,8 +177,11 @@ func (r resourcePet) ApplyResourceChange(ctx context.Context, req *tfprotov5.App
 	}
 
 	if len(r.Components) != 0 {
-		for _, comp := range r.Components {
+		for i, comp := range r.Components {
 			pet = fmt.Sprintf("%s%s%s", comp.Prefix, r.Separator, pet)
+			if comp.Computed == "" {
+				r.Components[i].Computed = pet
+			}
 		}
 	}
 
@@ -307,7 +312,7 @@ func (c components) ToTfValue() tftypes.Value {
 			if v.Computed != "" {
 				computed = tftypes.NewValue(tftypes.String, v.Computed)
 			} else {
-				computed = tftypes.NewValue(tftypes.String, "computed")
+				computed = tftypes.NewValue(tftypes.String, tftypes.UnknownValue)
 			}
 
 			list[i] = tftypes.NewValue(component{}.schema(), map[string]tftypes.Value{
@@ -320,6 +325,7 @@ func (c components) ToTfValue() tftypes.Value {
 	}
 	return comp
 }
+
 func (r resourcePet) Equals(other resourcePet) bool {
 	// TODO: write an actual comparison, this is just for hackery
 	return reflect.DeepEqual(r, other)
