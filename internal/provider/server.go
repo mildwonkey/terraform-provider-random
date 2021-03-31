@@ -5,8 +5,8 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
-	"github.com/hashicorp/terraform-plugin-go/tfprotov5/tftypes"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
+	"github.com/hashicorp/terraform-plugin-go/tftypes"
 )
 
 func init() {
@@ -14,17 +14,17 @@ func init() {
 }
 
 type server struct {
-	providerSchema     *tfprotov5.Schema
-	providerMetaSchema *tfprotov5.Schema
-	resourceSchemas    map[string]*tfprotov5.Schema
-	dataSourceSchemas  map[string]*tfprotov5.Schema
+	providerSchema     *tfprotov6.Schema
+	providerMetaSchema *tfprotov6.Schema
+	resourceSchemas    map[string]*tfprotov6.Schema
+	dataSourceSchemas  map[string]*tfprotov6.Schema
 
-	tfprotov5.DataSourceServer
-	tfprotov5.ResourceServer
+	tfprotov6.DataSourceServer
+	tfprotov6.ResourceServer
 }
 
-func (s server) GetProviderSchema(ctx context.Context, req *tfprotov5.GetProviderSchemaRequest) (*tfprotov5.GetProviderSchemaResponse, error) {
-	return &tfprotov5.GetProviderSchemaResponse{
+func (s server) GetProviderSchema(ctx context.Context, req *tfprotov6.GetProviderSchemaRequest) (*tfprotov6.GetProviderSchemaResponse, error) {
+	return &tfprotov6.GetProviderSchemaResponse{
 		Provider:          s.providerSchema,
 		ProviderMeta:      s.providerMetaSchema,
 		ResourceSchemas:   s.resourceSchemas,
@@ -32,32 +32,32 @@ func (s server) GetProviderSchema(ctx context.Context, req *tfprotov5.GetProvide
 	}, nil
 }
 
-func (s server) PrepareProviderConfig(ctx context.Context, req *tfprotov5.PrepareProviderConfigRequest) (*tfprotov5.PrepareProviderConfigResponse, error) {
-	return &tfprotov5.PrepareProviderConfigResponse{
+func (s server) PrepareProviderConfig(ctx context.Context, req *tfprotov6.PrepareProviderConfigRequest) (*tfprotov6.PrepareProviderConfigResponse, error) {
+	return &tfprotov6.PrepareProviderConfigResponse{
 		PreparedConfig: req.Config,
 	}, nil
 }
 
-func (s server) ConfigureProvider(ctx context.Context, req *tfprotov5.ConfigureProviderRequest) (*tfprotov5.ConfigureProviderResponse, error) {
-	return &tfprotov5.ConfigureProviderResponse{}, nil
+func (s server) ConfigureProvider(ctx context.Context, req *tfprotov6.ConfigureProviderRequest) (*tfprotov6.ConfigureProviderResponse, error) {
+	return &tfprotov6.ConfigureProviderResponse{}, nil
 }
 
-func (s server) StopProvider(ctx context.Context, req *tfprotov5.StopProviderRequest) (*tfprotov5.StopProviderResponse, error) {
-	return &tfprotov5.StopProviderResponse{}, nil
+func (s server) StopProvider(ctx context.Context, req *tfprotov6.StopProviderRequest) (*tfprotov6.StopProviderResponse, error) {
+	return &tfprotov6.StopProviderResponse{}, nil
 }
 
-func Server() tfprotov5.ProviderServer {
+func Server() tfprotov6.ProviderServer {
 	return server{
-		providerSchema: &tfprotov5.Schema{
+		providerSchema: &tfprotov6.Schema{
 			Version: 1,
-			Block:   &tfprotov5.SchemaBlock{},
+			Block:   &tfprotov6.SchemaBlock{},
 		},
-		resourceSchemas: map[string]*tfprotov5.Schema{
+		resourceSchemas: map[string]*tfprotov6.Schema{
 			"random_pet": {
 				Version: 1,
-				Block: &tfprotov5.SchemaBlock{
+				Block: &tfprotov6.SchemaBlock{
 					Version: 1,
-					Attributes: []*tfprotov5.SchemaAttribute{
+					Attributes: []*tfprotov6.SchemaAttribute{
 						{
 							Name:     "id",
 							Type:     tftypes.String,
@@ -67,7 +67,7 @@ func Server() tfprotov5.ProviderServer {
 							Name:            "length",
 							Type:            tftypes.Number,
 							Description:     "The length (in words) of the pet name.",
-							DescriptionKind: tfprotov5.StringKindPlain,
+							DescriptionKind: tfprotov6.StringKindPlain,
 							Optional:        true,
 							Computed:        true,
 						},
@@ -75,52 +75,40 @@ func Server() tfprotov5.ProviderServer {
 							Name:            "separator",
 							Type:            tftypes.String,
 							Description:     "The character to separate words in the pet name.",
-							DescriptionKind: tfprotov5.StringKindPlain,
+							DescriptionKind: tfprotov6.StringKindPlain,
 							Computed:        true,
 						},
 						{
 							Name: "components",
-							// Type: tftypes.List{
-							// 	ElementType: tftypes.Object{
-							// 		AttributeTypes: map[string]tftypes.Type{
-							// 			"prefix":   tftypes.String,
-							// 			"secret":   tftypes.String,
-							// 			"computed": tftypes.String,
-							// 		},
-							// 		OptionalAttrs: []string{"secret", "computed"},
-							// 	},
-							// },
-							NestedBlock: &tfprotov5.SchemaNestedBlock{
-								TypeName: "components",
-								Block: &tfprotov5.SchemaBlock{
-									Attributes: []*tfprotov5.SchemaAttribute{
-										{
-											Type:        tftypes.String,
-											Name:        "prefix",
-											Optional:    true,
-											Description: "a string prefix for the pet name",
-											Sensitive:   false,
-										},
-										{
-											Type:        tftypes.String,
-											Name:        "secret",
-											Optional:    true,
-											Description: "a string prefix for the pet name",
-											Sensitive:   true,
-										},
-										{
-											Type:        tftypes.String,
-											Name:        "computed",
-											Optional:    true,
-											Description: "a string prefix for the pet name",
-											Computed:    true,
-										},
+							NestedType: &tfprotov6.SchemaObject{
+								Attributes: []*tfprotov6.SchemaAttribute{
+									{
+										Type:        tftypes.String,
+										Name:        "prefix",
+										Optional:    true,
+										Description: "a string prefix for the pet name",
+										Sensitive:   false,
+									},
+									{
+										Type:        tftypes.String,
+										Name:        "secret",
+										Optional:    true,
+										Description: "a string prefix for the pet name",
+										Sensitive:   true,
+									},
+									{
+										Type:        tftypes.String,
+										Name:        "computed",
+										Optional:    true,
+										Description: "a string prefix for the pet name",
+										Computed:    true,
 									},
 								},
-								Nesting: tfprotov5.SchemaNestedBlockNestingModeList,
+
+								Nesting: tfprotov6.SchemaObjectNestingModeList,
 							},
 							Description:     "The character to separate words in the pet name.",
-							DescriptionKind: tfprotov5.StringKindPlain,
+							DescriptionKind: tfprotov6.StringKindPlain,
 							Optional:        true,
 						},
 					},

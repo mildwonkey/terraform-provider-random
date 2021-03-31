@@ -8,4 +8,4 @@ require (
 	github.com/hashicorp/terraform-plugin-go v0.0.0-20201030131818-7e96a4130c51
 )
 
-replace github.com/hashicorp/terraform-plugin-go => /Users/kristin/go/src/github.com/mildwonkey/terraform-plugin-go
+replace github.com/hashicorp/terraform-plugin-go => /Users/kristin/go/src/github.com/mildwonkey/terraform-plugin-go 

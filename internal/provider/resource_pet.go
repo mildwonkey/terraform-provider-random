@@ -9,8 +9,8 @@ import (
 
 	petname "github.com/dustinkirkland/golang-petname"
 
-	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
-	"github.com/hashicorp/terraform-plugin-go/tfprotov5/tftypes"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
+	"github.com/hashicorp/terraform-plugin-go/tftypes"
 )
 
 type resourcePet struct {
@@ -139,20 +139,20 @@ func (r resourcePet) schema() tftypes.Object {
 }
 
 var (
-	_ tfprotov5.ResourceServer = (*resourcePet)(nil)
+	_ tfprotov6.ResourceServer = (*resourcePet)(nil)
 )
 
-func (r resourcePet) ValidateResourceTypeConfig(ctx context.Context, req *tfprotov5.ValidateResourceTypeConfigRequest) (*tfprotov5.ValidateResourceTypeConfigResponse, error) {
-	return &tfprotov5.ValidateResourceTypeConfigResponse{}, nil
+func (r resourcePet) ValidateResourceConfig(ctx context.Context, req *tfprotov6.ValidateResourceConfigRequest) (*tfprotov6.ValidateResourceConfigResponse, error) {
+	return &tfprotov6.ValidateResourceConfigResponse{}, nil
 }
 
-func (r resourcePet) ApplyResourceChange(ctx context.Context, req *tfprotov5.ApplyResourceChangeRequest) (*tfprotov5.ApplyResourceChangeResponse, error) {
+func (r resourcePet) ApplyResourceChange(ctx context.Context, req *tfprotov6.ApplyResourceChangeRequest) (*tfprotov6.ApplyResourceChangeResponse, error) {
 	schema := r.schema()
 	planned, err := req.PlannedState.Unmarshal(schema)
 	// destroy
 	if planned.IsNull() {
-		return &tfprotov5.ApplyResourceChangeResponse{
-			NewState: &tfprotov5.DynamicValue{
+		return &tfprotov6.ApplyResourceChangeResponse{
+			NewState: &tfprotov6.DynamicValue{
 				MsgPack: req.PlannedState.MsgPack,
 			},
 		}, nil
@@ -193,10 +193,10 @@ func (r resourcePet) ApplyResourceChange(ctx context.Context, req *tfprotov5.App
 	}).MarshalMsgPack(schema)
 
 	if err != nil {
-		return &tfprotov5.ApplyResourceChangeResponse{
-			Diagnostics: []*tfprotov5.Diagnostic{
+		return &tfprotov6.ApplyResourceChangeResponse{
+			Diagnostics: []*tfprotov6.Diagnostic{
 				{
-					Severity: tfprotov5.DiagnosticSeverityError,
+					Severity: tfprotov6.DiagnosticSeverityError,
 					Summary:  "Error encoding state",
 					Detail:   fmt.Sprintf("Error encoding state: %s", err.Error()),
 				},
@@ -204,18 +204,18 @@ func (r resourcePet) ApplyResourceChange(ctx context.Context, req *tfprotov5.App
 		}, nil
 	}
 
-	return &tfprotov5.ApplyResourceChangeResponse{
-		NewState: &tfprotov5.DynamicValue{
+	return &tfprotov6.ApplyResourceChangeResponse{
+		NewState: &tfprotov6.DynamicValue{
 			MsgPack: state,
 		},
 	}, nil
 }
 
-func (r resourcePet) ImportResourceState(ctx context.Context, req *tfprotov5.ImportResourceStateRequest) (*tfprotov5.ImportResourceStateResponse, error) {
-	return &tfprotov5.ImportResourceStateResponse{}, nil
+func (r resourcePet) ImportResourceState(ctx context.Context, req *tfprotov6.ImportResourceStateRequest) (*tfprotov6.ImportResourceStateResponse, error) {
+	return &tfprotov6.ImportResourceStateResponse{}, nil
 }
 
-func (r resourcePet) PlanResourceChange(ctx context.Context, req *tfprotov5.PlanResourceChangeRequest) (*tfprotov5.PlanResourceChangeResponse, error) {
+func (r resourcePet) PlanResourceChange(ctx context.Context, req *tfprotov6.PlanResourceChangeRequest) (*tfprotov6.PlanResourceChangeResponse, error) {
 	schema := r.schema()
 
 	state, err := req.ProposedNewState.Unmarshal(schema)
@@ -229,7 +229,7 @@ func (r resourcePet) PlanResourceChange(ctx context.Context, req *tfprotov5.Plan
 
 	// If we are doing a destroy, return the proposed state as-is
 	if state.IsNull() {
-		return &tfprotov5.PlanResourceChangeResponse{
+		return &tfprotov6.PlanResourceChangeResponse{
 			PlannedState: req.ProposedNewState,
 		}, nil
 	}
@@ -261,10 +261,10 @@ func (r resourcePet) PlanResourceChange(ctx context.Context, req *tfprotov5.Plan
 		"separator":  tftypes.NewValue(tftypes.String, r.Separator),
 	}).MarshalMsgPack(schema)
 	if err != nil {
-		return &tfprotov5.PlanResourceChangeResponse{
-			Diagnostics: []*tfprotov5.Diagnostic{
+		return &tfprotov6.PlanResourceChangeResponse{
+			Diagnostics: []*tfprotov6.Diagnostic{
 				{
-					Severity: tfprotov5.DiagnosticSeverityError,
+					Severity: tfprotov6.DiagnosticSeverityError,
 					Summary:  "Error encoding state",
 					Detail:   fmt.Sprintf("Error encoding state: %s", err.Error()),
 				},
@@ -272,24 +272,24 @@ func (r resourcePet) PlanResourceChange(ctx context.Context, req *tfprotov5.Plan
 		}, nil
 	}
 
-	return &tfprotov5.PlanResourceChangeResponse{
-		PlannedState: &tfprotov5.DynamicValue{
+	return &tfprotov6.PlanResourceChangeResponse{
+		PlannedState: &tfprotov6.DynamicValue{
 			MsgPack: proposedState,
 		},
 	}, nil
 }
 
-func (r resourcePet) ReadResource(ctx context.Context, req *tfprotov5.ReadResourceRequest) (*tfprotov5.ReadResourceResponse, error) {
-	return &tfprotov5.ReadResourceResponse{
-		NewState: &tfprotov5.DynamicValue{
+func (r resourcePet) ReadResource(ctx context.Context, req *tfprotov6.ReadResourceRequest) (*tfprotov6.ReadResourceResponse, error) {
+	return &tfprotov6.ReadResourceResponse{
+		NewState: &tfprotov6.DynamicValue{
 			MsgPack: req.CurrentState.MsgPack,
 		},
 	}, nil
 }
 
-func (r resourcePet) UpgradeResourceState(ctx context.Context, req *tfprotov5.UpgradeResourceStateRequest) (*tfprotov5.UpgradeResourceStateResponse, error) {
-	return &tfprotov5.UpgradeResourceStateResponse{
-		UpgradedState: &tfprotov5.DynamicValue{
+func (r resourcePet) UpgradeResourceState(ctx context.Context, req *tfprotov6.UpgradeResourceStateRequest) (*tfprotov6.UpgradeResourceStateResponse, error) {
+	return &tfprotov6.UpgradeResourceStateResponse{
+		UpgradedState: &tfprotov6.DynamicValue{
 			JSON: req.RawState.JSON,
 		},
 	}, nil
