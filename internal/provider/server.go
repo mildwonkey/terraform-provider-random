@@ -32,8 +32,8 @@ func (s server) GetProviderSchema(ctx context.Context, req *tfprotov6.GetProvide
 	}, nil
 }
 
-func (s server) PrepareProviderConfig(ctx context.Context, req *tfprotov6.PrepareProviderConfigRequest) (*tfprotov6.PrepareProviderConfigResponse, error) {
-	return &tfprotov6.PrepareProviderConfigResponse{
+func (s server) ValidateProviderConfig(ctx context.Context, req *tfprotov6.ValidateProviderConfigRequest) (*tfprotov6.ValidateProviderConfigResponse, error) {
+	return &tfprotov6.ValidateProviderConfigResponse{
 		PreparedConfig: req.Config,
 	}, nil
 }
